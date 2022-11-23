@@ -1,0 +1,138 @@
+---
+title: "Women in STEM"
+author: "Lydia Gibson"
+format: 
+  revealjs:
+    theme: serif
+    footer: https://lgibson7.quarto.pub/women-in-stem/
+---
+
+# Introduction
+
+---
+
+In previous research for STAT 632 Linear & Logistic Regression, my colleagues and I explored the [Women In Stem](https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv) data set behind the FiveThirtyEight article ["The Economic Guide To Picking A College Major"](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series, to explore the relationship between gender demographics and median salary of major categories within STEM. Using median salary as the response, we fit a multiple linear regression model, ran model diagnostics, and a Box-Cox transformation on the response to validate and improve the fit of the regression model. 
+
+# Problem
+
+# Research Goals
+
+---
+
+While transforming response and explanatory variables is common in statistics, it often leads to models that are not easily explained to the average person. In this presentation, I will revisit the model that we fit and compare it with less accurate yet easier to explain models.
+
+# Data Source
+
+## Method
+
+## Results
+
+---
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+dat1 <- read.csv("women-stem.csv")
+library(pacman)
+suppressWarnings(p_load(dplyr, ggplot2, ggpubr, scales, MASS, car, lmtest, 
+                        ggrepel, faraway, ggcorrplot, GGally))
+options(scipen = 100) # remove scientific notation
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+# remove Rank, Major_code, and Major
+dat2 <- dat1[,-c(1,2,3)] 
+# Get totals for men and women for each major category
+dat_stats <- rbind(
+  # Get totals for men
+  dat2 %>% group_by(Major_category) %>%summarize(Grand_Total = sum(Men), Proportion=Grand_Total/sum(Total)) %>%
+mutate(Sex="Men", labelpos=Proportion/2),
+# Get totals for women
+dat2 %>% group_by(Major_category) %>%summarize(Grand_Total = sum(Women), Proportion=Grand_Total/sum(Total)) %>%
+  mutate(Sex="Women", labelpos=1 - (Proportion/2))) %>% mutate(Sex = Sex %>% factor(levels=c("Women","Men")))
+
+# Plot the gender proportions by major category
+dat_stats %>% ggplot(aes(x=Major_category,y=Proportion,fill=Sex)) +
+  stat_summary(geom = "bar", position="fill") +# stack side by side bars
+  theme(axis.text.x=element_text(angle = 7.5),# get x axes labels to fit
+        plot.title=element_text(size=17, hjust=0.5)) +# center title
+  geom_text(aes(label = paste0(round(100*Proportion,2),"%"), # get % labels
+                y=labelpos),size = 3,) +
+  scale_y_continuous(labels = scales::percent_format()) + 
+  labs(x="Major Category", y="Proportion of Gender (%)")
+```
+
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Get a box plot for Major category by Median
+bx_plt <- dat2 %>% ggplot(aes(x=Major_category,y=Median, fill=Major_category)) + 
+  geom_boxplot(show.legend=FALSE) +
+    labs(x="", y="Median Salary ($ 1000)") + 
+  theme(axis.text.x=element_text(angle=0)) + 
+  scale_y_continuous(breaks=c(40000,60000,80000,100000), # change scale labels of Median
+                     labels=c("40","60","80","100")) +
+   scale_x_discrete(labels=c("[1]", "[2]", "[3]" , "[4]", "[5]")) # change scale labels of Major_category
+  
+# Get the outliers
+outlier_pts <- dat1 %>%filter(Median > 100000 |(Median > 60000 & Major_category == "Physical Sciences"))
+
+jitter_plt <- dat1 %>%ggplot(aes(x=Major_category,y=Median, color=Major_category, size=ShareWomen)) +
+  geom_jitter(alpha = 1/4) +# make circle transparent to show overlap
+  theme(axis.text.x = element_text(angle=0, vjust=0.65),
+        plot.subtitle = element_text(hjust=0.5),
+        legend.position = c(0.82,0.82)) +
+  geom_text(data=outlier_pts, aes(label=Major, size=0.089),nudge_y=2, vjust=-1.6, hjust=0.7) + # label outliers
+  labs(x="", y="") +
+  guides(color=FALSE, # remove Major_category legend, remove "a" from legend
+         size=guide_legend(override.aes = list(alpha = 1, size = c(3,4.5,5.8)))) +
+    scale_y_continuous(breaks=c(40000,60000,80000,100000),
+                     labels=c("40","60","80","100")) +
+    scale_x_discrete(labels=c("[1]", "[2]", "[3]" , "[4]", "[5]"))
+
+ggarrange(bx_plt, jitter_plt, ncol=2)
+```
+
+---
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggpairs(dat2[,c(6,1:5)], c(1,3:6))
+
+
+```
+
+---
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+lm_full <- lm(Median~.,data=dat2)
+#boxcox(lm_full, lambda=seq(-2.5, 0.5, by =0.5))
+summary(lm_full)$adj.r.squared
+```
+
+```{r echo=FALSE, eval=F}
+new_x<-data.frame(Major_category="Engineering", Men=2057, ShareWomen=0.12056434, Total=2339, Women=282
+
+)
+Median_Pet<-predict(lm_full, newdata = new_x, type = "response", interval = "prediction")
+
+Median_Pet
+```
+
+```{r echo=FALSE, eval=F}
+new_x<-data.frame(Major_category="Engineering", Men=2057, ShareWomen=0.12056434)
+Median_Pet<-predict(lm_reduced, newdata = new_x, type = "response", interval = "prediction")
+
+Median_Pet^-1
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+options(scipen=3)
+lm_reduced <- lm((Median^(-1)) ~ Major_category + Men + ShareWomen + Men:ShareWomen,
+                 data=dat2[-c(2)])
+summary(lm_reduced)$adj.r.squared
+```
+
+# Conclusion
+
+# Further Research
+
+- I would like to export data from ACS API to run a time series analysis
