@@ -1,5 +1,6 @@
 ---
-title: "Women in STEM"
+title: "Revisiting the Women In STEM dataset"
+subtitle: "Practical Implications of Using Inverse Transformations in Multiple Linear Regression"
 author: "Lydia Gibson"
 format: 
   revealjs:
@@ -11,21 +12,17 @@ format:
 
 ---
 
-In previous research for STAT 632 Linear & Logistic Regression, my colleagues and I explored the [Women In Stem](https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv) data set behind the FiveThirtyEight article ["The Economic Guide To Picking A College Major"](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series, to explore the relationship between gender demographics and median salary of major categories within STEM. Using median salary as the response, we fit a multiple linear regression model, ran model diagnostics, and a Box-Cox transformation on the response to validate and improve the fit of the regression model. 
+In previous research, my colleagues and I explored the [Women In Stem](https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv) data set used for the FiveThirtyEight article ["The Economic Guide To Picking A College Major"](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series. We fit a multiple linear regression model to explore the relationship between gender demographics and median salary of major categories within STEM, using the inverse transformation of median salary as the response variable to improve the fit of the regression model, then ran model diagnostics. 
 
 # Problem
 
-# Research Goals
-
----
-
-While transforming response and explanatory variables is common in statistics, it often leads to models that are not easily explained to the average person. In this presentation, I will revisit the model that we fit and compare it with less accurate yet easier to explain models.
+While transforming response and explanatory variables is common in statistics, it often leads to models that are not easily explained to the average person. In this presentation, I will revisit the model that we fit and compare it with easier to explain models.
 
 # Data Source
 
-## Method
+# Method
 
-## Results
+# Results
 
 ---
 
@@ -132,6 +129,10 @@ summary(lm_reduced)$adj.r.squared
 ```
 
 # Conclusion
+
+- Inverse transformation creates non-symmetric confidence interval
+
+- Inverse creates small predictions
 
 # Further Research
 
