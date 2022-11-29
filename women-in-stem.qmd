@@ -26,61 +26,74 @@ options(scipen = 100) # remove scientific notation
 
 ---
 
-In previous research, my colleagues and I explored the [Women In Stem](https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv) data set used for the FiveThirtyEight article ["The Economic Guide To Picking A College Major"](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series. We fit a multiple linear regression model to explore the relationship between gender demographics and median salary of major categories within STEM, using the inverse transformation of median salary as the response variable to improve the fit of the regression model, then ran model diagnostics. 
+In our previous research, *[Gender Wage Inequality in STEM](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM)*, my colleagues and I explored the the relationship between gender demographics and median salary of major categories within STEM for our STAT 632 Linear and Logistic Regression final project. ...... We fit a multiple linear regression model to explore the relationship between gender demographics and median salary of major categories within STEM, using the inverse transformation of median salary as the response variable to improve the fit of the regression model, then ran model diagnostics. 
 
-# Problem
-
-While transforming response and explanatory variables is common in statistics, it often leads to models that are not easily explained to the average person. In this presentation, I will revisit the model that we fit and compare it with easier to explain models.
 
 # Data Source
   
-The [Women In Stem](https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv) data set used for the FiveThirtyEight article ["The Economic Guide To Picking A College Major"](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), was obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series (PUMS). It has 76 observations, each representing a STEM Major, and 9 variables: Rank, Major_code, Major,	Major_category,	Total,	Men,	Women,	ShareWomen, Median. 
-
----
-
-```{r}
-head(dat1)
-```
-
-
-# EDA
-
----
+The [Women In Stem](https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv) data set used for the FiveThirtyEight article ["The Economic Guide To Picking A College Major"](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series (PUMS). It has 76 observations, each representing a STEM Major, and 9 variables: Rank, Major_code, Major,	Major_category,	Total,	Men,	Women,	ShareWomen, Median. For our analysis and regression modelling, we did not use Rank, Major_code, or Major, so that we could just focus on the five major categories: Engineering,	Physical Sciences, Computers & Mathematics, Health, and Biology & Life Science.
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 # remove Rank, Major_code, and Major
-dat2 <- dat1[,-c(1,2,3)] 
+dat2 <- dat1[,-c(1,2)] 
 
 # Get totals for men and women for each major category
-dat_stats <- rbind(
+#dat_stats <- rbind(
   
   # Get totals for men
-  dat2 %>% group_by(Major_category) %>%
-    summarize(Grand_Total = sum(Men), Proportion=Grand_Total/sum(Total)) %>%
-    mutate(Sex="Men", labelpos=Proportion/2),
+  #dat2 %>% group_by(Major_category) %>%
+   # summarize(Grand_Total = sum(Men), Proportion=Grand_Total/sum(Total)) %>%
+    #mutate(Sex="Men", labelpos=Proportion/2),
   
 # Get totals for women
-dat2 %>% group_by(Major_category) %>%
-  summarize(Grand_Total = sum(Women), Proportion=Grand_Total/sum(Total)) %>%
-  mutate(Sex="Women", labelpos=1 - (Proportion/2))) %>% 
-  mutate(Sex = Sex %>% factor(levels=c("Women","Men")))
+#dat2 %>% group_by(Major_category) %>%
+ # summarize(Grand_Total = sum(Women), Proportion=Grand_Total/sum(Total)) %>%
+ # mutate(Sex="Women", labelpos=1 - (Proportion/2))) %>% 
+#  mutate(Sex = Sex %>% factor(levels=c("Women","Men")))
 
 # Plot the gender proportions by major category
-dat_stats %>% ggplot(aes(x=Major_category,y=Proportion,fill=Sex)) +
+#dat_stats %>% ggplot(aes(x=Major_category,y=Proportion,fill=Sex)) +
   # stack side by side bars
-  stat_summary(geom = "bar", position="fill") +
+ # stat_summary(geom = "bar", position="fill") +
   # get % labels
-  geom_text(aes(label = paste0(round(100*Proportion,2),"%"), 
-                y=labelpos),size = 3,) +
-  scale_y_continuous(labels = scales::percent_format()) + 
-  labs(x="Major Category", y="Proportion of Gender (%)") +
-  scale_x_discrete(labels = scales::label_wrap(15)) +
-  scale_fill_manual(values = c("#fcdde5", "#73d1f9"))
+ # geom_text(aes(label = paste0(round(100*Proportion,2),"%"), 
+ #               y=labelpos),size = 3,) +
+  #scale_y_continuous(labels = scales::percent_format()) + 
+ # labs(x="Major Category", y="Proportion of Gender (%)") +
+ # scale_x_discrete(labels = scales::label_wrap(15)) +
+  #scale_fill_manual(values = c("#fcdde5", "#73d1f9"))
 
-
+head(dat2)
 ```
+
+# Problem
+
+While transforming response and explanatory variables is common in statistics, it often leads to models that are not easily explained to the average person. In this presentation, I will revisit the model that we fit and compare it with easier to explain models.
+
+# Method
+
+In our previous research, we took the following steps in exploratory data analysis:
+- Used a bar chart to compare gender proportions per major category
+- Used a boxplot to compare median wages of STEM major categories
+- Ran an ANOVA to test whether the differences in median wage per STEM major category were statistically significant
+- Used a jitter plot to analyze the proportion of women in the individual majors with each STEM major category
+- Created a scatter plot matrix and correlation heat map to view the correlation between our response variable, Median, and the explanatory variables we selected
+
+---
+In our previous research, we took the following steps in modelling:
+- Checked the normality assumption for our response variable, Median, using a histogram and box cox analysis
+- Built our predictive models, with and without interactions, and tested the significance of our explantory variables to get a final reduced model
+- Ran model diagnostics to test the residuals vs fitted values, a normal qq plot to test that the residuals are normally distributed, VIF for multicollinearity .......
+
+---
+
+Following all this, we ran predictive intervals for select Majors of each major category to see the effectiveness of our model.
+
+In this project, I will redo many of these same analyses using both the untransformed and inverse of our response variable Median.
+
+# Results
 
 ---
 
@@ -275,4 +288,10 @@ Median_Pet^-1
 
 # Further Research
 
-- I would like to export data from ACS API to run a time series analysis
+- I would like to export data from ACS API to get more recent data and rerun the linear regression model using the [TidyModels](https://github.com/tidymodels) framework.
+
+- I would like to compare and contrast the statistical data visualizations and calculations, such as boxplots, box cox, correlation heatmaps, scatterplot matrices, etc., from the various ggplot2 extensions used in this presentation (see, ggpubr, ggstatplot, lindia,ggcorrplot, ), to the statistical data visualizations available in base R.
+
+# Code Appendix
+
+
