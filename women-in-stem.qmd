@@ -18,40 +18,40 @@ dat1 <- read.csv("women-stem.csv")
 library(pacman)
 
 suppressWarnings(p_load(dplyr, ggplot2, ggpubr, scales, MASS, car, lmtest, 
-                        ggrepel, faraway, ggcorrplot, GGally, lindia, see, performance, qqplotr, ggstatsplot, rstantools, PMCMRplus))
+                        ggrepel, faraway, ggcorrplot, GGally, lindia, see, performance, qqplotr, ggstatsplot, rstantools, PMCMRplus, cowplot))
 
 options(scipen = 100) # remove scientific notation
 ```
 
+In our previous research, *[Gender Wage Inequality in STEM](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM)*, my colleagues and I explored the the relationship between gender demographics and median salary of major categories within STEM for our STAT 632 Linear and Logistic Regression final project. We fit a multiple linear regression model to explore the relationship between gender demographics and median salary of major categories within STEM, using the inverse transformation of median salary as the response variable to improve the fit of the regression model, then ran model diagnostics to assess the fit of our model. 
 
----
+# Problem
 
-In our previous research, *[Gender Wage Inequality in STEM](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM)*, my colleagues and I explored the the relationship between gender demographics and median salary of major categories within STEM for our STAT 632 Linear and Logistic Regression final project. ...... We fit a multiple linear regression model to explore the relationship between gender demographics and median salary of major categories within STEM, using the inverse transformation of median salary as the response variable to improve the fit of the regression model, then ran model diagnostics. 
-
+While transforming response and/or explanatory variables is common in statistics, it often leads to models that are not easily explained to the average person. In this presentation, I will revisit the model that we fit and compare it with easier to explain models.
 
 # Data Source
   
-The [Women In Stem](https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv) data set used for the FiveThirtyEight article ["The Economic Guide To Picking A College Major"](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series (PUMS). It has 76 observations, each representing a STEM Major, and 9 variables: Rank, Major_code, Major,	Major_category,	Total,	Men,	Women,	ShareWomen, Median. For our analysis and regression modelling, we did not use Rank, Major_code, or Major, so that we could just focus on the five major categories: Engineering,	Physical Sciences, Computers & Mathematics, Health, and Biology & Life Science.
+The [Women In Stem](https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv) data set used for the FiveThirtyEight article ["The Economic Guide To Picking A College Major"](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series (PUMS). It has 76 observations, each representing a STEM Major, and 9 variables: Rank, Major_code, Major,	Major_category,	Total,	Men,	Women,	ShareWomen, Median. For our analysis and regression modelling, we did not use Rank and Major_code, so that we could just focus on the five major categories: Engineering,	Physical Sciences, Computers & Mathematics, Health, and Biology & Life Science.
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 # remove Rank, Major_code, and Major
-dat2 <- dat1[,-c(1,2)] 
+dat2 <- dat1[,-c(1,2,3)] 
 
 # Get totals for men and women for each major category
-#dat_stats <- rbind(
+dat_stats <- rbind(
   
-  # Get totals for men
-  #dat2 %>% group_by(Major_category) %>%
-   # summarize(Grand_Total = sum(Men), Proportion=Grand_Total/sum(Total)) %>%
-    #mutate(Sex="Men", labelpos=Proportion/2),
+#   Get totals for men
+  dat2 %>% group_by(Major_category) %>%
+    summarize(Grand_Total = sum(Men), Proportion=Grand_Total/sum(Total)) %>%
+    mutate(Sex="Men", labelpos=Proportion/2),
   
 # Get totals for women
-#dat2 %>% group_by(Major_category) %>%
- # summarize(Grand_Total = sum(Women), Proportion=Grand_Total/sum(Total)) %>%
- # mutate(Sex="Women", labelpos=1 - (Proportion/2))) %>% 
-#  mutate(Sex = Sex %>% factor(levels=c("Women","Men")))
+dat2 %>% group_by(Major_category) %>%
+ summarize(Grand_Total = sum(Women), Proportion=Grand_Total/sum(Total)) %>%
+ mutate(Sex="Women", labelpos=1 - (Proportion/2))) %>% 
+mutate(Sex = Sex %>% factor(levels=c("Women","Men")))
 
 # Plot the gender proportions by major category
 #dat_stats %>% ggplot(aes(x=Major_category,y=Proportion,fill=Sex)) +
@@ -68,9 +68,7 @@ dat2 <- dat1[,-c(1,2)]
 head(dat2)
 ```
 
-# Problem
 
-While transforming response and explanatory variables is common in statistics, it often leads to models that are not easily explained to the average person. In this presentation, I will revisit the model that we fit and compare it with easier to explain models.
 
 # Method
 
@@ -120,9 +118,8 @@ bx_plt
 ```
 
 
----
 
-```{r}
+```{r eval=FALSE}
 ggbetweenstats(
   data  = dat2,
   x     = Major_category,
@@ -132,9 +129,8 @@ ggbetweenstats(
 ```
 
 
----
 
-```{r}
+```{r eval=FALSE}
 
 
 # Box plots with jittered points
@@ -155,8 +151,7 @@ p + stat_compare_means(comparisons = my_comparisons)+ # Add pairwise comparisons
   stat_compare_means(label.y = 50)                   # Add global p-value
 ```
 
-
----
+----
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -199,64 +194,57 @@ ggpairs(dat2[,c(6,1:5)], c(1,3:6))
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
+options(scipen=3)
+
 lm_full <- lm(Median~.,data=dat2)
-boxcox(lm_full, lambda=seq(-2.5, 0.5, by =0.5))
+
+lm_reduced <- lm((Median^(-1)) ~ Major_category + Men + ShareWomen + Men*ShareWomen,
+                 data=dat2)
+#boxcox(lm_full, lambda=seq(-2.5, 0.5, by =0.5))
 #summary(lm_full)$adj.r.squared
+
+#library(performance)
+#library(see)
+
+p1 <- gghistogram(dat2$Median)
+p2 <- gghistogram(dat2$Median^-1)
+
+plot_grid(p1, p2)
 ```
-
-
----
-
-```{r}
-hist(dat2$Median, breaks = 50)
-```
-
-
-----
-
-```{r}
-#plot(lm_full)
-```
-
 
 
 -----
 
 ```{r}
-#gg_diagnose(lm_full)
-#gg_qqplot(lm_full)
-gg_boxcox(lm_full)
-gghistogram(dat2$Median)
 
+#gg_qqplot(lm_full)
+
+p3 <-gg_boxcox(lm_full)
 check <- check_normality(lm_full)
-plot(check, type = "qq")
+p4 <- plot(check, type = "qq")
+
+p5 <- gg_boxcox(lm_reduced)
+check <- check_normality(lm_reduced)
+p6 <- plot(check, type = "qq")
+
+plot_grid(p3, p4, p5, p6)
 ```
 
 
 ----
 
+```{r}
+gg_diagnose(lm_full)
 
-
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-library(performance)
-library(see)
-
-
-options(scipen=3)
-
-lm_reduced <- lm((Median^(-1)) ~ Major_category + Men + ShareWomen + Men*ShareWomen,
-                 data=dat2)
-
-#gg_diagnose(lm_reduced)
-#gg_qqplot(lm_reduced)
-gg_boxcox(lm_reduced)
-gghistogram(dat2$Median^-1)
-
-check <- check_normality(lm_reduced)
-
-plot(check, type = "qq")
 ```
+
+----
+
+```{r}
+gg_diagnose(lm_reduced)
+```
+
+
 
 # Results
 
@@ -290,8 +278,9 @@ Median_Pet^-1
 
 - I would like to export data from ACS API to get more recent data and rerun the linear regression model using the [TidyModels](https://github.com/tidymodels) framework.
 
-- I would like to compare and contrast the statistical data visualizations and calculations, such as boxplots, box cox, correlation heatmaps, scatterplot matrices, etc., from the various ggplot2 extensions used in this presentation (see, ggpubr, ggstatplot, lindia,ggcorrplot, ), to the statistical data visualizations available in base R.
+- I would like to compare and contrast the statistical data visualizations and calculations, such as boxplots, box cox, correlation heatmaps, scatterplot matrices, etc., from the various ggplot2 extensions used in this presentation ([ggpubr](https://github.com/kassambara/ggpubr), [see](https://github.com/easystats/see), [performance](https://github.com/easystats/performance), [qqplotr](https://github.com/aloy/qqplotr), [ggstatsplot](https://github.com/IndrajeetPatil/ggstatsplot) [lindia](https://github.com/yeukyul/lindia), [ggcorrplot](https://github.com/kassambara/ggcorrplot)), to the statistical data visualizations available in base R.
 
 # Code Appendix
 
+Code for this presentation can be found at [https://github.com/lgibson7/Women-in-STEM](https://github.com/lgibson7/Women-in-STEM).
 
