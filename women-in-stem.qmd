@@ -1,16 +1,13 @@
 ---
-title: "Revisiting the Women In STEM dataset"
-subtitle: "Practical Implications of Using Inverse Transformations in Multiple Linear Regression"
+title: "Practical Implications of Using the Inverse Transformation in MLR"
 author: "Lydia Gibson"
 format: 
   revealjs:
-    theme: serif
+    theme: moon
     footer: https://lgibson7.quarto.pub/women-in-stem/
 ---
 
-
 # Introduction
-
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 dat1 <- read.csv("women-stem.csv")
@@ -23,16 +20,34 @@ suppressWarnings(p_load(dplyr, ggplot2, ggpubr, scales, MASS, car, lmtest,
 options(scipen = 100) # remove scientific notation
 ```
 
-In our previous research, *[Gender Wage Inequality in STEM](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM)*, my colleagues and I explored the the relationship between gender demographics and median salary of major categories within STEM for our STAT 632 Linear and Logistic Regression final project. We fit a multiple linear regression model to explore the relationship between gender demographics and median salary of major categories within STEM, using the inverse transformation of median salary as the response variable to improve the fit of the regression model, then ran model diagnostics to assess the fit of our model. 
+- In [previous research](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM), I explored the the relationship between gender demographics and median salary of major categories within STEM. 
+- The final model used the inverse transformation of the response variable to improve the fit of the regression model, then ran model diagnostics to assess the fit of our model.
+- While transforming response and/or explanatory variables can lead to a better fitting model, often is not easily understood by the average person. 
+
+# Outline
+
+- Problem
+- Data Source
+- Methods
+- Results
+- Conclusion
+- Further Research
 
 # Problem
 
-While transforming response and/or explanatory variables is common in statistics, it often leads to models that are not easily explained to the average person. In this presentation, I will revisit the model that we fit and compare it with easier to explain models.
+- How much prediction power is lost by not using a transformed response variable in a multiple linear regression model?
 
 # Data Source
-  
-The [Women In Stem](https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv) data set used for the FiveThirtyEight article ["The Economic Guide To Picking A College Major"](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series (PUMS). It has 76 observations, each representing a STEM Major, and 9 variables: Rank, Major_code, Major,	Major_category,	Total,	Men,	Women,	ShareWomen, Median. For our analysis and regression modelling, we did not use Rank and Major_code, so that we could just focus on the five major categories: Engineering,	Physical Sciences, Computers & Mathematics, Health, and Biology & Life Science.
 
+- I will be using [data](https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv) obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series (PUMS). 
+
+- It has 76 observations, each representing a STEM major, and 9 variables: `Rank`, `Major_code`, `Major`, `Major_category`, `Total`, `Men`, `Women`, `ShareWomen`, `Median`. 
+
+# Method
+
+- In this project, I will compare multiple linear regression models using both **with** a inverse transformation dependent response variable and the other **without** a inverse transformation dependent response variable.
+
+---
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -65,35 +80,9 @@ mutate(Sex = Sex %>% factor(levels=c("Women","Men")))
  # scale_x_discrete(labels = scales::label_wrap(15)) +
   #scale_fill_manual(values = c("#fcdde5", "#73d1f9"))
 
-head(dat2)
+#head(dat2)
 ```
 
-
-
-# Method
-
-In our previous research, we took the following steps in exploratory data analysis:
-- Used a bar chart to compare gender proportions per major category
-- Used a boxplot to compare median wages of STEM major categories
-- Ran an ANOVA to test whether the differences in median wage per STEM major category were statistically significant
-- Used a jitter plot to analyze the proportion of women in the individual majors with each STEM major category
-- Created a scatter plot matrix and correlation heat map to view the correlation between our response variable, Median, and the explanatory variables we selected
-
----
-In our previous research, we took the following steps in modelling:
-- Checked the normality assumption for our response variable, Median, using a histogram and box cox analysis
-- Built our predictive models, with and without interactions, and tested the significance of our explantory variables to get a final reduced model
-- Ran model diagnostics to test the residuals vs fitted values, a normal qq plot to test that the residuals are normally distributed, VIF for multicollinearity .......
-
----
-
-Following all this, we ran predictive intervals for select Majors of each major category to see the effectiveness of our model.
-
-In this project, I will redo many of these same analyses using both the untransformed and inverse of our response variable Median.
-
-# Results
-
----
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
   
@@ -117,7 +106,7 @@ bx_plt
 
 ```
 
-
+---
 
 ```{r eval=FALSE}
 ggbetweenstats(
@@ -127,8 +116,6 @@ ggbetweenstats(
   title = "Distribution of Median Salaries across STEM Major Categories"
 )
 ```
-
-
 
 ```{r eval=FALSE}
 
@@ -151,7 +138,7 @@ p + stat_compare_means(comparisons = my_comparisons)+ # Add pairwise comparisons
   stat_compare_means(label.y = 50)                   # Add global p-value
 ```
 
-----
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -180,18 +167,17 @@ jitter_plt + scale_colour_viridis_d(option = "B")
 
 ```
 
----
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
 ggpairs(dat2[,c(6,1:5)], c(1,3:6))
 
 
 ```
 
+
+# Results
+
 ---
-
-# Method
-
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 options(scipen=3)
@@ -212,8 +198,7 @@ p2 <- gghistogram(dat2$Median^-1)
 plot_grid(p1, p2)
 ```
 
-
------
+------------------------------------------------------------------------
 
 ```{r}
 
@@ -230,26 +215,20 @@ p6 <- plot(check, type = "qq")
 plot_grid(p3, p4, p5, p6)
 ```
 
-
-----
+------------------------------------------------------------------------
 
 ```{r}
 gg_diagnose(lm_full)
 
 ```
 
-----
+------------------------------------------------------------------------
 
 ```{r}
 gg_diagnose(lm_reduced)
 ```
 
-
-
-# Results
-
-
-
+----
 
 ```{r echo=FALSE, eval=F}
 new_x<-data.frame(Major_category="Engineering", Men=2057, ShareWomen=0.12056434, Total=2339, Women=282
@@ -267,20 +246,16 @@ Median_Pet<-predict(lm_reduced, newdata = new_x, type = "response", interval = "
 Median_Pet^-1
 ```
 
-
 # Conclusion
 
-- Inverse transformation creates non-symmetric confidence interval
-
-- Inverse creates small predictions
 
 # Further Research
 
-- I would like to export data from ACS API to get more recent data and rerun the linear regression model using the [TidyModels](https://github.com/tidymodels) framework.
+-   I would like to export data from ACS API to get more recent data and rerun the linear regression model using the [TidyModels](https://github.com/tidymodels) framework.
 
-- I would like to compare and contrast the statistical data visualizations and calculations, such as boxplots, box cox, correlation heatmaps, scatterplot matrices, etc., from the various ggplot2 extensions used in this presentation ([ggpubr](https://github.com/kassambara/ggpubr), [see](https://github.com/easystats/see), [performance](https://github.com/easystats/performance), [qqplotr](https://github.com/aloy/qqplotr), [ggstatsplot](https://github.com/IndrajeetPatil/ggstatsplot) [lindia](https://github.com/yeukyul/lindia), [ggcorrplot](https://github.com/kassambara/ggcorrplot)), to the statistical data visualizations available in base R.
+-   I would like to compare and contrast the statistical data visualizations from the various ggplot2 extensions used in this presentation: ([`ggpubr`](https://github.com/kassambara/ggpubr), [`see`](https://github.com/easystats/see), [`performance`](https://github.com/easystats/performance), [`qqplotr`](https://github.com/aloy/qqplotr), [`ggstatsplot`](https://github.com/IndrajeetPatil/ggstatsplot), [`lindia`](https://github.com/yeukyul/lindia), [`ggcorrplot`](https://github.com/kassambara/ggcorrplot)), to the statistical data visualizations available in base R.
 
 # Code Appendix
 
-Code for this presentation can be found at [https://github.com/lgibson7/Women-in-STEM](https://github.com/lgibson7/Women-in-STEM).
+Code for this presentation can be found at <https://github.com/lgibson7/Women-in-STEM>.
 
