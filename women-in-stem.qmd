@@ -15,12 +15,10 @@ format:
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 dat1 <- read.csv("women-stem.csv")
 
-install.packages("ggstatsplot")
-
 library(pacman)
 
 suppressWarnings(p_load(dplyr, ggplot2, ggpubr, scales, MASS, car, lmtest, 
-                        ggrepel, faraway, ggcorrplot, GGally, lindia, see, performance, qqplotr, ggstatplot, rstantools, PMCMRplus))
+                        ggrepel, faraway, ggcorrplot, GGally, lindia, see, performance, qqplotr, ggstatsplot, rstantools, PMCMRplus))
 
 options(scipen = 100) # remove scientific notation
 ```
