@@ -47,7 +47,7 @@ options(scipen = 100) # remove scientific notation
 
 - In this project, I will compare multiple linear regression models using both **with** a inverse transformation dependent response variable and **without** a inverse transformation dependent response variable.
 
----
+## Proportion of Women and Median Salary by Major Category
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -68,79 +68,33 @@ dat2 %>% group_by(Major_category) %>%
  mutate(Sex="Women", labelpos=1 - (Proportion/2))) %>% 
 mutate(Sex = Sex %>% factor(levels=c("Women","Men")))
 
-# Plot the gender proportions by major category
-#dat_stats %>% ggplot(aes(x=Major_category,y=Proportion,fill=Sex)) +
-  # stack side by side bars
- # stat_summary(geom = "bar", position="fill") +
-  # get % labels
- # geom_text(aes(label = paste0(round(100*Proportion,2),"%"), 
- #               y=labelpos),size = 3,) +
-  #scale_y_continuous(labels = scales::percent_format()) + 
- # labs(x="Major Category", y="Proportion of Gender (%)") +
- # scale_x_discrete(labels = scales::label_wrap(15)) +
-  #scale_fill_manual(values = c("#fcdde5", "#73d1f9"))
+# bar chart
+p7 <- dat_stats %>% ggplot(aes(x=Major_category,y=Proportion,fill=Sex)) +
+  stat_summary(geom = "bar", position="fill") +
+  scale_y_continuous(labels = scales::percent_format()) + 
+  labs(x="Major Category", y="Proportion of Gender (%)") +
+  scale_x_discrete(labels = scales::label_wrap(15)) +
+  scale_fill_manual(values = c("#fcdde5", "#73d1f9") 
+                    )
 
-#head(dat2)
-```
+p7 <- p7 + theme(legend.position = "top")
 
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-  
-# Get the outliers
-outlier_pts <- dat1 %>%filter(Median > 100000 & Major_category == "Engineering" | (Median > 60000 & Major_category == "Physical Sciences"))
-
-# Get a box plot for Major category by Median
-bx_plt <- dat2 %>% ggplot(aes(x=Major_category,y=Median)) + 
-  geom_boxplot(show.legend=FALSE) +
-    labs(x="Major Category", y="Median Salary ($ 1000)") + 
-  theme(axis.text.x=element_text(angle=0)) + 
-  # label outliers
-  geom_text(data=outlier_pts, aes(label=Major),nudge_y=2, vjust=-1.6, hjust=0.7, color = "Black", size= 2) + 
-  # change scale labels of Median
-  scale_y_continuous(breaks=c(40000,60000,80000,100000), 
-                     labels=c("40","60","80","100")) +
-     # Wrap text for major categories
-  scale_x_discrete(labels = scales::label_wrap(15))
-
-bx_plt
-
-```
-
----
-
-```{r eval=FALSE}
-ggbetweenstats(
+# violin plot
+p8 <- ggbetweenstats(
   data  = dat2,
   x     = Major_category,
   y     = Median,
   title = "Distribution of Median Salaries across STEM Major Categories"
-)
-```
+  )
 
-```{r eval=FALSE}
-
-
-# Box plots with jittered points
-# :::::::::::::::::::::::::::::::::::::::::::::::::::
-# Change outline colors by groups: dose
-# Use custom color palette
-# Add jitter points and change the shape by groups
- p <- ggboxplot(dat2, x = "Major_category", y = "Median",
-                color = "Major_category", 
-                add = "jitter")
- #p
- 
-  
- # Add p-values comparing groups
- # Specify the comparisons you want
-my_comparisons <- list( c("Engineering", "Physical Sciences"), c("Computers & Mathematics", "Physical Sciences"), c("Health", "Biology & Life Science") )
-p + stat_compare_means(comparisons = my_comparisons)+ # Add pairwise comparisons p-value
-  stat_compare_means(label.y = 50)                   # Add global p-value
+plot_grid(p7,p8)
 ```
 
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE}
 
 # Get the outliers
 outlier_pts <- dat1 %>%filter(Median > 100000 |(Median > 60000 & Major_category == "Physical Sciences"))
@@ -168,16 +122,11 @@ jitter_plt + scale_colour_viridis_d(option = "B")
 ```
 
 
-```{r echo=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
-ggpairs(dat2[,c(6,1:5)], c(1,3:6))
-
-
-```
 
 
 # Results
 
----
+## Historgrams of Response Variable, with and without transformation
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 options(scipen=3)
@@ -198,7 +147,7 @@ p2 <- gghistogram(dat2$Median^-1)
 plot_grid(p1, p2)
 ```
 
-------------------------------------------------------------------------
+## Box Cox and QQ Plot for full and reduced model
 
 ```{r}
 
@@ -215,19 +164,20 @@ p6 <- plot(check, type = "qq")
 plot_grid(p3, p4, p5, p6)
 ```
 
-------------------------------------------------------------------------
+## Diagnostic Plots for Full Model
 
 ```{r}
 gg_diagnose(lm_full)
 
 ```
 
-------------------------------------------------------------------------
+## Diagnostic Plots for Reduced Model
 
 ```{r}
 gg_diagnose(lm_reduced)
 ```
 
+## Prediction Intervals
 
 ```{r echo=FALSE, eval=F}
 new_x<-data.frame(Major_category="Engineering", Men=2057, ShareWomen=0.12056434, Total=2339, Women=282
