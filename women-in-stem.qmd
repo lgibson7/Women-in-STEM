@@ -15,11 +15,12 @@ format:
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 dat1 <- read.csv("women-stem.csv")
 
+install.packages("ggstatsplot")
 
 library(pacman)
 
 suppressWarnings(p_load(dplyr, ggplot2, ggpubr, scales, MASS, car, lmtest, 
-                        ggrepel, faraway, ggcorrplot, GGally))
+                        ggrepel, faraway, ggcorrplot, GGally, lindia, see, performance, qqplotr, ggstatplot, rstantools, PMCMRplus))
 
 options(scipen = 100) # remove scientific notation
 ```
@@ -110,6 +111,42 @@ bx_plt
 
 ---
 
+```{r}
+ggbetweenstats(
+  data  = dat2,
+  x     = Major_category,
+  y     = Median,
+  title = "Distribution of Median Salaries across STEM Major Categories"
+)
+```
+
+
+---
+
+```{r}
+
+
+# Box plots with jittered points
+# :::::::::::::::::::::::::::::::::::::::::::::::::::
+# Change outline colors by groups: dose
+# Use custom color palette
+# Add jitter points and change the shape by groups
+ p <- ggboxplot(dat2, x = "Major_category", y = "Median",
+                color = "Major_category", 
+                add = "jitter")
+ #p
+ 
+  
+ # Add p-values comparing groups
+ # Specify the comparisons you want
+my_comparisons <- list( c("Engineering", "Physical Sciences"), c("Computers & Mathematics", "Physical Sciences"), c("Health", "Biology & Life Science") )
+p + stat_compare_means(comparisons = my_comparisons)+ # Add pairwise comparisons p-value
+  stat_compare_means(label.y = 50)                   # Add global p-value
+```
+
+
+---
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 # Get the outliers
@@ -156,6 +193,60 @@ boxcox(lm_full, lambda=seq(-2.5, 0.5, by =0.5))
 #summary(lm_full)$adj.r.squared
 ```
 
+
+---
+
+```{r}
+hist(dat2$Median, breaks = 50)
+```
+
+
+----
+
+```{r}
+#plot(lm_full)
+```
+
+
+
+-----
+
+```{r}
+#gg_diagnose(lm_full)
+#gg_qqplot(lm_full)
+gg_boxcox(lm_full)
+gghistogram(dat2$Median)
+
+check <- check_normality(lm_full)
+plot(check, type = "qq")
+```
+
+
+----
+
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(performance)
+library(see)
+
+
+options(scipen=3)
+
+lm_reduced <- lm((Median^(-1)) ~ Major_category + Men + ShareWomen + Men*ShareWomen,
+                 data=dat2)
+
+#gg_diagnose(lm_reduced)
+#gg_qqplot(lm_reduced)
+gg_boxcox(lm_reduced)
+gghistogram(dat2$Median^-1)
+
+check <- check_normality(lm_reduced)
+
+plot(check, type = "qq")
+```
+
 # Results
 
 
@@ -177,12 +268,6 @@ Median_Pet<-predict(lm_reduced, newdata = new_x, type = "response", interval = "
 Median_Pet^-1
 ```
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-options(scipen=3)
-lm_reduced <- lm((Median^(-1)) ~ Major_category + Men + ShareWomen + Men:ShareWomen,
-                 data=dat2[-c(2)])
-summary(lm_reduced)$adj.r.squared
-```
 
 # Conclusion
 
