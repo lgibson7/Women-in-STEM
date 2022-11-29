@@ -21,7 +21,7 @@ options(scipen = 100) # remove scientific notation
 ```
 
 - In [previous research](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM), I explored the the relationship between gender demographics and median salary of major categories within STEM. 
-- The final model used the inverse transformation of the response variable to improve the fit of the regression model, then ran model diagnostics to assess the fit of our model.
+- The final model used the inverse transformation of the response variable to improve the fit of the regression model.
 - While transforming response and/or explanatory variables can lead to a better fitting model, often is not easily understood by the average person. 
 
 # Outline
@@ -45,7 +45,7 @@ options(scipen = 100) # remove scientific notation
 
 # Method
 
-- In this project, I will compare multiple linear regression models using both **with** a inverse transformation dependent response variable and the other **without** a inverse transformation dependent response variable.
+- In this project, I will compare multiple linear regression models using both **with** a inverse transformation dependent response variable and **without** a inverse transformation dependent response variable.
 
 ---
 
@@ -228,7 +228,6 @@ gg_diagnose(lm_full)
 gg_diagnose(lm_reduced)
 ```
 
-----
 
 ```{r echo=FALSE, eval=F}
 new_x<-data.frame(Major_category="Engineering", Men=2057, ShareWomen=0.12056434, Total=2339, Women=282
