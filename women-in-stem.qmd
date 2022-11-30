@@ -28,6 +28,7 @@ options(scipen = 100) # remove scientific notation
 
 - Problem
 - Data Source
+- Background
 - Methods
 - Results
 - Conclusion
@@ -43,11 +44,10 @@ options(scipen = 100) # remove scientific notation
 
 - It has 76 observations, each representing a STEM major, and 9 variables: `Rank`, `Major_code`, `Major`, `Major_category`, `Total`, `Men`, `Women`, `ShareWomen`, `Median`. 
 
-# Method
 
-- In this project, I will compare multiple linear regression models **with** a inverse transformation dependent response variable and **without** a inverse transformation dependent response variable.
+# Background
 
-## Background
+## Major Category by Share of Women
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -78,17 +78,23 @@ p7 <- dat_stats %>% ggplot(aes(x=Major_category,y=Proportion,fill=Sex)) +
                     )
 
 p7 <- p7 + theme(legend.position = "top")
+p7
 
+
+```
+
+## Median by Major Category
+
+```{r}
 # violin plot
-p8 <- ggbetweenstats(
+p8 <- ggstatsplot::ggbetweenstats(
   data  = dat2,
   x     = Major_category,
   y     = Median
   )
 
-plot_grid(p7,p8)
+p8
 ```
-
 
 
 
@@ -121,9 +127,10 @@ jitter_plt + scale_colour_viridis_d(option = "B")
 ```
 
 
+# Method
 
+- In this project, I will compare multiple linear regression models **with** a inverse transformation dependent response variable and **without** a inverse transformation dependent response variable.
 
-# Results
 
 ## Comparison of Models
 
@@ -141,14 +148,14 @@ lm_reduced <- lm((Median^(-1)) ~ Major_category + Men + ShareWomen + Men*ShareWo
 #library(performance)
 #library(see)
 
-p1 <- ggpubr::gghistogram(dat2$Median) + ggtitle("Without Transformation")
+p1 <- ggpubr::gghistogram(dat2$Median) + ggtitle("Response Variable Without Transformation")
 
-p2 <- ggpubr::gghistogram(dat2$Median^-1) + ggtitle("With Transformation")
+p2 <- ggpubr::gghistogram(dat2$Median^-1) + ggtitle("Response Variable With Transformation")
 
-p3 <-lindia::gg_boxcox(lm_full) + ggtitle("Full Model")
+p3 <-lindia::gg_boxcox(lm_full) + ggtitle("Box Cox Plot for Full Model")
 
 
-p4 <- lindia::gg_boxcox(lm_reduced) + ggtitle("Reduced Model")
+p4 <- lindia::gg_boxcox(lm_reduced) + ggtitle("Box Cox Plot for Reduced Model")
 
 
 plot_grid(p1, p2, p3, p4)
@@ -171,26 +178,19 @@ performance::check_model(lm_full)
 performance::check_model(lm_reduced)
 ```
 
-## Prediction Intervals
 
-```{r echo=FALSE, eval=F}
-new_x<-data.frame(Major_category="Engineering", Men=2057, ShareWomen=0.12056434, Total=2339, Women=282
 
-)
-Median_Pet<-predict(lm_full, newdata = new_x, type = "response", interval = "prediction")
+# Results
 
-Median_Pet
+```{r}
+performance::compare_performance(lm_reduced, lm_full)
 ```
 
-```{r echo=FALSE, eval=F}
-new_x<-data.frame(Major_category="Engineering", Men=2057, ShareWomen=0.12056434)
-Median_Pet<-predict(lm_reduced, newdata = new_x, type = "response", interval = "prediction")
 
-Median_Pet^-1
-```
 
 # Conclusion
 
+ Make conclusion... 
 
 # Further Research
 
@@ -200,5 +200,5 @@ Median_Pet^-1
 
 # Code Appendix
 
-Code for this presentation can be found at <https://github.com/lgibson7/Women-in-STEM>.
+Code for this presentation can be found at: <https://github.com/lgibson7/Women-in-STEM>.
 
