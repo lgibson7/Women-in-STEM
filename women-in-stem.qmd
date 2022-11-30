@@ -15,13 +15,13 @@ dat1 <- read.csv("women-stem.csv")
 library(pacman)
 
 suppressWarnings(p_load(dplyr, ggplot2, ggpubr, scales, MASS, car, lmtest, 
-                        ggrepel, faraway, ggcorrplot, GGally, lindia, see, performance, ggstatsplot, rstantools, PMCMRplus, cowplot))
+                        ggrepel, faraway, ggcorrplot, GGally, lindia, see, performance, ggstatsplot, rstantools, PMCMRplus, cowplot, parameters, report, datawizard))
 
 options(scipen = 100) # remove scientific notation
 ```
 
-- In [previous research](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM), I explored the the relationship between gender demographics and median salary of STEM major categories. 
-- The final **multiple linear regression (MLR)** model used the inverse transformation of the response variable to improve the fit.
+- In [previous research](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM), I used **multiple linear regression (MLR)** to explore the the relationship between gender demographics and median salary of STEM major categories. 
+- My final model used the inverse transformation of the response variable to improve the model fit.
 - While transforming response and/or explanatory variables can lead to a better fitting model, often it is not easily understood by the average person. 
 
 # Outline
@@ -42,11 +42,11 @@ Further Research
 
 # Problem
 
-- How much prediction power is lost by **not** using a transformed response variable in a multiple linear regression model?
+How much prediction power is lost by **not** using a transformed response variable in a multiple linear regression model?
 
 # Data Source
 
-- I will be using [data](https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv) obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series (PUMS). 
+- The [data](https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv) was obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series (PUMS). 
 
 - It has 76 observations, each representing a STEM major, and 9 variables: `Rank`, `Major_code`, `Major`, `Major_category`, `Total`, `Men`, `Women`, `ShareWomen`, `Median`. 
 
@@ -72,15 +72,15 @@ dat_stats <- rbind(
 dat2 %>% group_by(Major_category) %>%
  summarize(Grand_Total = sum(Women), Proportion=Grand_Total/sum(Total)) %>%
  mutate(Sex="Women", labelpos=1 - (Proportion/2))) %>% 
-mutate(Sex = Sex %>% factor(levels=c("Women","Men")))
+mutate(Sex = Sex %>% factor(levels=c("Men", "Women")))
 
 # bar chart
-p7 <- dat_stats %>% ggplot(aes(x=Major_category,y=Proportion,fill=Sex)) +
+p7 <- dat_stats %>% ggplot(aes(x=Major_category, y=Proportion, fill=Sex)) +
   stat_summary(geom = "bar", position="fill") +
   scale_y_continuous(labels = scales::percent_format()) + 
   labs(x="Major Category", y="Proportion of Gender (%)") +
   scale_x_discrete(labels = scales::label_wrap(15)) +
-  scale_fill_manual(values = c("#fcdde5", "#73d1f9") 
+  scale_fill_manual(values = c( "#F1F1F1", "#FCA3B5") 
                     )
 
 p7 <- p7 + theme(legend.position = "top")
@@ -94,9 +94,15 @@ p7
 ```{r}
 # violin plot
 p8 <- ggstatsplot::ggbetweenstats(
-  data  = dat2,
+  data  = dat1,
   x     = Major_category,
-  y     = Median
+  y     = Median,
+  type = "robust",
+  outlier.tagging = TRUE,
+  outlier.label = Major,
+  package = "ggsci",
+  palette = "default_jco"
+  
   )
 
 p8
@@ -135,12 +141,37 @@ jitter_plt + scale_colour_viridis_d(option = "B")
 
 # Method
 
-- In this project, I will compare multiple linear regression models **with** a inverse transformation dependent response variable and **without** a inverse transformation dependent response variable.
+- In this project, I will compare multiple linear regression models **with** an inverse transformation dependent response variable to one **without** an inverse transformation dependent response variable.
 - The **full additive model** is without any transformations while the **reduced model** uses the inverse transformed response variable and interaction terms for better fit.
 
-## Models
+# Models
 
-```{r}
+
+## Full Additive Model Parameters
+
+```{r echo=FALSE}
+options(scipen=3)
+
+#datawizard::standardize(dat2)
+
+lm_full <- lm(Median~.,data=dat2)
+
+lm_reduced <- lm((Median^(-1)) ~ Major_category + Men + ShareWomen + Men*ShareWomen,
+                 data=dat2)
+
+
+```
+
+
+```{r, size= "tiny"}
+parameters::model_parameters(lm_full)
+```
+
+## Reduced Model Parameters
+
+
+```{r, size="tiny"}
+parameters::model_parameters(lm_reduced)
 
 ```
 
@@ -149,13 +180,6 @@ jitter_plt + scale_colour_viridis_d(option = "B")
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-options(scipen=3)
-
-lm_full <- lm(Median~.,data=dat2)
-
-lm_reduced <- lm((Median^(-1)) ~ Major_category + Men + ShareWomen + Men*ShareWomen,
-                 data=dat2)
-
 
 #library(performance)
 #library(see)
@@ -164,7 +188,7 @@ p1 <- ggpubr::gghistogram(dat2$Median) + ggtitle("Response Variable Without Tran
 
 p2 <- ggpubr::gghistogram(dat2$Median^-1) + ggtitle("Response Variable With Transformation")
 
-p3 <-lindia::gg_boxcox(lm_full) + ggtitle("Box Cox Plot for Full Model")
+p3 <-lindia::gg_boxcox(lm_full) + ggtitle("Box Cox Plot for Full Additive Model")
 
 
 p4 <- lindia::gg_boxcox(lm_reduced) + ggtitle("Box Cox Plot for Reduced Model")
@@ -176,7 +200,7 @@ plot_grid(p1, p2, p3, p4)
 
 
 
-## Diagnostic Plots for Full Model
+## Diagnostic Plots for Full Additive Model
 
 ```{r}
 #lindia::gg_diagnose(lm_full)
@@ -194,31 +218,41 @@ performance::check_model(lm_reduced)
 
 # Results
 
+## Metrics Comparison
+
 ```{r}
-performance::compare_performance(lm_reduced, lm_full)
+performance::compare_performance(lm_reduced, lm_full, metrics = "common")
 ```
 
+```{r eval=FALSE}
+report::report(lm_reduced)
+report::report(lm_full)
+```
 
 
 # Conclusion
 
- Make conclusion... 
+-
 
 # Further Research
 
--   I would like to use the ACS API to export more recent data and rerun the linear regression model using the [TidyModels](https://github.com/tidymodels) framework.
+-   I would like to use the ACS Application Programming Interface (API) to export more recent data and run the multiple linear regression models using the [TidyModels](https://github.com/tidymodels) framework.
 
--   I would like to compare and contrast the base R statistical data visualizations to those from the various ggplot2 extension packages ([`ggpubr`](https://github.com/kassambara/ggpubr), [`see`](https://github.com/easystats/see), [`performance`](https://github.com/easystats/performance), [`lindia`](https://github.com/yeukyul/lindia), [`ggstatsplot`](https://github.com/IndrajeetPatil/ggstatsplot)) used in this presentation.
+-   I would like to compare the base R statistical data visualizations to those from the various ggplot2 extension packages ([`ggpubr`](https://github.com/kassambara/ggpubr), [`see`](https://github.com/easystats/see), [`performance`](https://github.com/easystats/performance), [`lindia`](https://github.com/yeukyul/lindia), [`ggstatsplot`](https://github.com/IndrajeetPatil/ggstatsplot)) used in this presentation.
 
 # Acknowledgements
 
 - I would like to thank my colleagues, Sara Hatter and Ken Vu, with whom I collaborated on the previous research project [*Gender Wage Inequality in STEM*](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM).
 
-- I would like to thank the FiveThirtyEight blog for uploading the data behind the story [*The Economic Guide To Picking A College Major*](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), which was used for this analysis.
+- I would like to thank the FiveThirtyEight blog for uploading the data behind their story, [*The Economic Guide To Picking A College Major*](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), which was used for this analysis.
 
 - I would like to thank Prof. Eric Suess for his assistance with this research.
 
-# Code Appendix
+# Appendix
+
+This presentation can be viewed at: <https://lgibson7.quarto.pub/women-in-stem>. 
 
 Code for this presentation can be found at: <https://github.com/lgibson7/Women-in-STEM>.
+
+
 
