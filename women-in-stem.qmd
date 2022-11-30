@@ -3,8 +3,8 @@ title: "Practical Implications of Using the Inverse Transformation in MLR"
 author: "Lydia Gibson"
 format: 
   revealjs:
-    theme: moon
-    footer: https://lgibson7.quarto.pub/women-in-stem/
+    theme: simple
+    footer: Cal State East Bay STAT 694 Final Presentation
 ---
 
 # Introduction
@@ -15,13 +15,13 @@ dat1 <- read.csv("women-stem.csv")
 library(pacman)
 
 suppressWarnings(p_load(dplyr, ggplot2, ggpubr, scales, MASS, car, lmtest, 
-                        ggrepel, faraway, ggcorrplot, GGally, lindia, see, performance, qqplotr, ggstatsplot, rstantools, PMCMRplus, cowplot))
+                        ggrepel, faraway, ggcorrplot, GGally, lindia, see, performance, ggstatsplot, rstantools, PMCMRplus, cowplot))
 
 options(scipen = 100) # remove scientific notation
 ```
 
-- In [previous research](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM), I explored the the relationship between gender demographics and median salary of major categories within STEM. 
-- The final multiple linear regression (MLR) model used the inverse transformation of the response variable to improve the fit.
+- In [previous research](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM), I explored the the relationship between gender demographics and median salary of STEM major categories. 
+- The final **multiple linear regression (MLR)** model used the inverse transformation of the response variable to improve the fit.
 - While transforming response and/or explanatory variables can lead to a better fitting model, often it is not easily understood by the average person. 
 
 # Outline
@@ -83,8 +83,7 @@ p7 <- p7 + theme(legend.position = "top")
 p8 <- ggbetweenstats(
   data  = dat2,
   x     = Major_category,
-  y     = Median,
-  title = "Distribution of Median Salaries across STEM Major Categories"
+  y     = Median
   )
 
 plot_grid(p7,p8)
@@ -126,7 +125,9 @@ jitter_plt + scale_colour_viridis_d(option = "B")
 
 # Results
 
-## Response Variables, without and with transformation
+## Comparison of Models
+
+- The **full additive model** is without any transformations while the **reduced model** uses the inverse transformed response variable and interaction terms for better fit.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 options(scipen=3)
@@ -135,48 +136,39 @@ lm_full <- lm(Median~.,data=dat2)
 
 lm_reduced <- lm((Median^(-1)) ~ Major_category + Men + ShareWomen + Men*ShareWomen,
                  data=dat2)
-#boxcox(lm_full, lambda=seq(-2.5, 0.5, by =0.5))
-#summary(lm_full)$adj.r.squared
+
 
 #library(performance)
 #library(see)
 
-p1 <- gghistogram(dat2$Median)
-p2 <- gghistogram(dat2$Median^-1)
+p1 <- ggpubr::gghistogram(dat2$Median) + ggtitle("Without Transformation")
 
-plot_grid(p1, p2)
+p2 <- ggpubr::gghistogram(dat2$Median^-1) + ggtitle("With Transformation")
+
+p3 <-lindia::gg_boxcox(lm_full) + ggtitle("Full Model")
+
+
+p4 <- lindia::gg_boxcox(lm_reduced) + ggtitle("Reduced Model")
+
+
+plot_grid(p1, p2, p3, p4)
 ```
 
-## Box Cox and QQ Plot for Full and Reduced Model
 
-The **full additive model** is without any transformations while the **reduced model** uses the inverse transformed response variable and interaction terms for better fit.
 
-```{r}
-
-#gg_qqplot(lm_full)
-
-p3 <-gg_boxcox(lm_full)
-check <- check_normality(lm_full)
-p4 <- plot(check, type = "qq")
-
-p5 <- gg_boxcox(lm_reduced)
-check <- check_normality(lm_reduced)
-p6 <- plot(check, type = "qq")
-
-plot_grid(p3, p4, p5, p6)
-```
 
 ## Diagnostic Plots for Full Model
 
 ```{r}
-gg_diagnose(lm_full)
-
+#lindia::gg_diagnose(lm_full)
+performance::check_model(lm_full)
 ```
 
 ## Diagnostic Plots for Reduced Model
 
 ```{r}
-gg_diagnose(lm_reduced)
+#lindia::gg_diagnose(lm_reduced)
+performance::check_model(lm_reduced)
 ```
 
 ## Prediction Intervals
@@ -204,7 +196,7 @@ Median_Pet^-1
 
 -   I would like to export more recent data from the ACS API and rerun the linear regression model using the [TidyModels](https://github.com/tidymodels) framework.
 
--   I would like to compare and contrast the statistical data visualizations from the various ggplot2 extensions used in this presentation: ([`ggpubr`](https://github.com/kassambara/ggpubr), [`see`](https://github.com/easystats/see), [`performance`](https://github.com/easystats/performance), [`qqplotr`](https://github.com/aloy/qqplotr), [`ggstatsplot`](https://github.com/IndrajeetPatil/ggstatsplot), [`lindia`](https://github.com/yeukyul/lindia), [`ggcorrplot`](https://github.com/kassambara/ggcorrplot)), to the statistical data visualizations available in base R.
+-   I would like to compare and contrast the base R statistical data visualizations to various ggplot2 extensions used in this presentation: [`ggpubr`](https://github.com/kassambara/ggpubr), [`see`](https://github.com/easystats/see), [`performance`](https://github.com/easystats/performance), [`lindia`](https://github.com/yeukyul/lindia), [`ggstatsplot`](https://github.com/IndrajeetPatil/ggstatsplot).
 
 # Code Appendix
 
