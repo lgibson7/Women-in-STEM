@@ -1,2 +1,3 @@
-# Women-in-STEM
-Final Project for STAT 694 Applied Research in Statistics &amp; Biostatistics, Cal State East Bay Fall 2022
+# Practical Implications of Using the Inverse Transformation in MLR
+
+In this project, I compared a full additive multiple linear regression model (MLR) with an inverse transformation dependent response variable (and interaction terms for better fit) to one without an inverse transformation dependent response variable. In our previous research, [Gender Wage Inequality in STEM](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM), my colleagues and I used MLR to explore the relationship between gender demographics and median salary of STEM major categories. Our final model used the inverse transformation of the response variable to improve the model fit. While transforming response and/or explanatory variables can lead to a better fitting model, often it is not easily understood by the average person. In this project, I set out to find how prediction power is lost by not using a transformed response variable to fit a MLR model.
