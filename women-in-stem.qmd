@@ -21,8 +21,8 @@ options(scipen = 100) # remove scientific notation
 ```
 
 - In [previous research](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM), I explored the the relationship between gender demographics and median salary of major categories within STEM. 
-- The final model used the inverse transformation of the response variable to improve the fit of the regression model.
-- While transforming response and/or explanatory variables can lead to a better fitting model, often is not easily understood by the average person. 
+- The final multiple linear regression (MLR) model used the inverse transformation of the response variable to improve the fit.
+- While transforming response and/or explanatory variables can lead to a better fitting model, often it is not easily understood by the average person. 
 
 # Outline
 
@@ -45,9 +45,9 @@ options(scipen = 100) # remove scientific notation
 
 # Method
 
-- In this project, I will compare multiple linear regression models using both **with** a inverse transformation dependent response variable and **without** a inverse transformation dependent response variable.
+- In this project, I will compare multiple linear regression models **with** a inverse transformation dependent response variable and **without** a inverse transformation dependent response variable.
 
-## Proportion of Women and Median Salary by Major Category
+## Background
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -126,7 +126,7 @@ jitter_plt + scale_colour_viridis_d(option = "B")
 
 # Results
 
-## Historgrams of Response Variable, with and without transformation
+## Response Variables, without and with transformation
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 options(scipen=3)
@@ -147,7 +147,9 @@ p2 <- gghistogram(dat2$Median^-1)
 plot_grid(p1, p2)
 ```
 
-## Box Cox and QQ Plot for full and reduced model
+## Box Cox and QQ Plot for Full and Reduced Model
+
+The **full additive model** is without any transformations while the **reduced model** uses the inverse transformed response variable and interaction terms for better fit.
 
 ```{r}
 
@@ -200,7 +202,7 @@ Median_Pet^-1
 
 # Further Research
 
--   I would like to export data from ACS API to get more recent data and rerun the linear regression model using the [TidyModels](https://github.com/tidymodels) framework.
+-   I would like to export more recent data from the ACS API and rerun the linear regression model using the [TidyModels](https://github.com/tidymodels) framework.
 
 -   I would like to compare and contrast the statistical data visualizations from the various ggplot2 extensions used in this presentation: ([`ggpubr`](https://github.com/kassambara/ggpubr), [`see`](https://github.com/easystats/see), [`performance`](https://github.com/easystats/performance), [`qqplotr`](https://github.com/aloy/qqplotr), [`ggstatsplot`](https://github.com/IndrajeetPatil/ggstatsplot), [`lindia`](https://github.com/yeukyul/lindia), [`ggcorrplot`](https://github.com/kassambara/ggcorrplot)), to the statistical data visualizations available in base R.
 
