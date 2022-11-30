@@ -225,14 +225,24 @@ performance::check_model(lm_reduced)
 performance::compare_performance(lm_reduced, lm_full, metrics = "common")
 ```
 
+## Model Prediction
+
+*statistical output*
+
 ```{r eval=FALSE}
 report::report(lm_reduced)
 report::report(lm_full)
 ```
 
-## Model Prediction
+
+
+
 
 # Conclusion
+
+- Bullet point 1
+- Bullet point 2
+- Bullet point 3
 
 # Further Research
 
