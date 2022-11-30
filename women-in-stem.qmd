@@ -3,6 +3,7 @@ title: "Practical Implications of Using the Inverse Transformation in MLR"
 author: "Lydia Gibson"
 format: 
   revealjs:
+    preview-links: true
     theme: simple
     footer: Cal State East Bay STAT 694 Final Presentation
 ---
@@ -20,7 +21,7 @@ suppressWarnings(p_load(dplyr, ggplot2, ggpubr, scales, MASS, car, lmtest,
 options(scipen = 100) # remove scientific notation
 ```
 
-- In [previous research](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM), I used **multiple linear regression (MLR)** to explore the the relationship between gender demographics and median salary of STEM major categories. 
+- In [previous research](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM), I used **multiple linear regression (MLR)** to explore the relationship between gender demographics and median salary of STEM major categories. 
 - My final model used the inverse transformation of the response variable to improve the model fit.
 - While transforming response and/or explanatory variables can lead to a better fitting model, often it is not easily understood by the average person. 
 
@@ -229,10 +230,9 @@ report::report(lm_reduced)
 report::report(lm_full)
 ```
 
+## Model Prediction
 
 # Conclusion
-
--
 
 # Further Research
 
