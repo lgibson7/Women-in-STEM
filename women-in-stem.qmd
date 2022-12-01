@@ -4,7 +4,7 @@ author: "Lydia Gibson"
 format: 
   revealjs:
     preview-links: true
-    theme: simple
+    theme: [default, style.scss]
     footer: Cal State East Bay STAT 694 Final Presentation
 ---
 
