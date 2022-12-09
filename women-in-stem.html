@@ -334,9 +334,9 @@
 
 </div>
 <ul>
-<li>In <a href="https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM">previous research</a>, I used <strong>multiple linear regression (MLR)</strong> to explore the relationship between median salary of STEM major categories and gender demographics.</li>
-<li>The final reduced model used the inverse transformation of the response variable to improve the model fit.</li>
-<li>While transforming response and/or explanatory variables can lead to a better fitting model, often it is not easily understood by the average person.</li>
+<li>In previous research, I’ve used multiple linear regression <strong>(MLR)</strong> to explore the relationship between median salary of STEM majors and gender demographics.</li>
+<li>The final reduced model used the inverse transformation of the response variable, due to the skewness of it’s distribution, to improve the model fit.</li>
+<li>While transforming response variables can lead to better fitting models, these models are not easy to explain.</li>
 </ul>
 </section>
 
@@ -344,7 +344,6 @@
 <h1>Outline</h1>
 <p>Problem</p>
 <p>Data Source</p>
-<p>Background</p>
 <p>Methods</p>
 <p>Results</p>
 <p>Conclusion</p>
@@ -353,139 +352,112 @@
 
 <section id="problem" class="title-slide slide level1 center">
 <h1>Problem</h1>
-<p>How much prediction power is lost by <strong><em>not</em></strong> using a transformed response variable in a multiple linear regression model?</p>
+<ul>
+<li><p>How much prediction power is lost by <strong><em>not</em></strong> using a transformed response variable in a linear regression model?</p></li>
+<li><p>Is it worth the inability to easily explain your model?</p></li>
+</ul>
 </section>
 
+<section>
 <section id="data-source" class="title-slide slide level1 center">
 <h1>Data Source</h1>
 <ul>
-<li>The <a href="https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv">data</a> was obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series (PUMS).</li>
-<li>It has 76 observations, each representing a STEM major, and 9 variables: <code>Rank</code>, <code>Major_code</code>, <code>Major</code>, <code>Major_category</code>, <code>Total</code>, <code>Men</code>, <code>Women</code>, <code>ShareWomen</code>, <code>Median</code>.</li>
+<li>The <a href="https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv">data set</a> was obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series (PUMS).</li>
+<li>It has 76 observations and 9 variables.</li>
 </ul>
+<div class="cell">
+
+</div>
 </section>
+<section id="exploratory-data-analysis" class="slide level2">
+<h2>Exploratory Data Analysis</h2>
 
-<section>
-<section id="background" class="title-slide slide level1 center">
-<h1>Background</h1>
-
-</section>
-<section id="section" class="slide level2">
-<h2></h2>
-
-<img data-src="women-in-stem_files/figure-revealjs/unnamed-chunk-2-1.png" width="960" class="r-stretch"></section>
-<section id="section-1" class="slide level2">
-<h2></h2>
-
-<img data-src="women-in-stem_files/figure-revealjs/unnamed-chunk-3-1.png" width="960" class="r-stretch"></section></section>
+<img data-src="women-in-stem_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch"></section></section>
 <section>
 <section id="method" class="title-slide slide level1 center">
 <h1>Method</h1>
-<ul>
-<li>In this project, I will compare multiple linear regression models <strong>with</strong> an inverse transformation dependent response variable to one <strong>without</strong> an inverse transformation dependent response variable.</li>
-</ul>
-<div class="cell">
 
-</div>
 </section>
-<section id="model-without-transformed-variable" class="slide level2">
-<h2>Model <em>Without</em> Transformed Variable</h2>
+<section id="model-without-transformation" class="slide level2">
+<h2>Model <em>Without</em> Transformation</h2>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>Parameter                                | Coefficient |       SE |                95% CI | t(68) |      p
-----------------------------------------------------------------------------------------------------------
-(Intercept)                              |    44417.86 |  7078.22 | [ 30293.48, 58542.23] |  6.28 | &lt; .001
-Major category [Computers &amp; Mathematics] |     2917.10 |  4947.20 | [ -6954.88, 12789.08] |  0.59 | 0.557 
-Major category [Engineering]             |    16527.04 |  4943.60 | [  6662.24, 26391.84] |  3.34 | 0.001 
-Major category [Health]                  |     2767.99 |  4488.88 | [ -6189.44, 11725.42] |  0.62 | 0.540 
-Major category [Physical Sciences]       |     4589.51 |  4162.22 | [ -3716.08, 12895.09] |  1.10 | 0.274 
-Total                                    |        0.03 |     0.05 | [    -0.08,     0.14] |  0.57 | 0.569 
-Men                                      |       -0.05 |     0.11 | [    -0.28,     0.17] | -0.49 | 0.627 
-ShareWomen                               |   -14094.31 | 11189.09 | [-36421.79,  8233.18] | -1.26 | 0.212 </code></pre>
+<pre><code>Parameter                                | Coefficient |      SE |               95% CI | t(71) |      p
+--------------------------------------------------------------------------------------------------------
+(Intercept)                              |    36421.43 | 2597.45 | [31242.27, 41600.59] | 14.02 | &lt; .001
+Major category [Computers &amp; Mathematics] |     6324.03 | 3915.80 | [-1483.85, 14131.90] |  1.62 | 0.111 
+Major category [Engineering]             |    20961.33 | 3162.87 | [14654.74, 27267.92] |  6.63 | &lt; .001
+Major category [Health]                  |      403.57 | 3823.34 | [-7219.95,  8027.09] |  0.11 | 0.916 
+Major category [Physical Sciences]       |     5468.57 | 4023.95 | [-2554.95, 13492.09] |  1.36 | 0.178 </code></pre>
+</div>
+</div>
+</section>
+<section id="why-a-transformation" class="slide level2">
+<h2>Why a Transformation?</h2>
+
+<img data-src="women-in-stem_files/figure-revealjs/unnamed-chunk-6-1.png" width="960" class="r-stretch"></section>
+<section id="model-with-transformation" class="slide level2">
+<h2>Model <em>With</em> Transformation</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Parameter                                | Coefficient |       SE |         95% CI | t(71) |      p
+---------------------------------------------------------------------------------------------------
+(Intercept)                              |    2.79e-05 | 9.88e-07 | [ 0.00,  0.00] | 28.23 | &lt; .001
+Major category [Computers &amp; Mathematics] |   -4.19e-06 | 1.49e-06 | [ 0.00,  0.00] | -2.81 | 0.006 
+Major category [Engineering]             |   -9.69e-06 | 1.20e-06 | [ 0.00,  0.00] | -8.06 | &lt; .001
+Major category [Health]                  |   -1.47e-07 | 1.45e-06 | [ 0.00,  0.00] | -0.10 | 0.920 
+Major category [Physical Sciences]       |   -3.33e-06 | 1.53e-06 | [ 0.00,  0.00] | -2.17 | 0.033 </code></pre>
 </div>
 </div>
 </section></section>
-<section>
-<section id="why-do-a-transformation" class="title-slide slide level1 center">
-<h1>Why Do a Transformation?</h1>
-
-<img data-src="women-in-stem_files/figure-revealjs/unnamed-chunk-6-1.png" width="960" class="r-stretch"></section>
-<section id="model-with-transformed-variable" class="slide level2">
-<h2>Model <em>With</em> Transformed Variable</h2>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>Parameter                                | Coefficient |       SE |         95% CI | t(68) |      p
----------------------------------------------------------------------------------------------------
-(Intercept)                              |    2.71e-05 | 2.68e-06 | [ 0.00,  0.00] | 10.13 | &lt; .001
-Major category [Computers &amp; Mathematics] |   -3.44e-06 | 1.90e-06 | [ 0.00,  0.00] | -1.82 | 0.074 
-Major category [Engineering]             |   -8.87e-06 | 1.89e-06 | [ 0.00,  0.00] | -4.69 | &lt; .001
-Major category [Health]                  |   -3.99e-07 | 1.72e-06 | [ 0.00,  0.00] | -0.23 | 0.818 
-Major category [Physical Sciences]       |   -3.09e-06 | 1.59e-06 | [ 0.00,  0.00] | -1.94 | 0.056 
-Men                                      |   -4.14e-11 | 4.16e-11 | [ 0.00,  0.00] | -1.00 | 0.323 
-ShareWomen                               |    1.08e-06 | 4.25e-06 | [ 0.00,  0.00] |  0.26 | 0.799 
-Men × ShareWomen                         |    8.96e-11 | 1.01e-10 | [ 0.00,  0.00] |  0.89 | 0.376 </code></pre>
-</div>
-</div>
-</section>
-<section id="comparison-of-models" class="slide level2">
-<h2>Comparison of Models</h2>
-<p><em>Comparison</em></p>
-</section>
-<section id="diagnostic-plots-for-model-without-transformations" class="slide level2">
-<h2>Diagnostic Plots for Model <em>Without</em> Transformations</h2>
-
-<img data-src="women-in-stem_files/figure-revealjs/unnamed-chunk-8-1.png" width="960" class="r-stretch"></section>
-<section id="diagnostic-plots-for-model-with-transformations" class="slide level2">
-<h2>Diagnostic Plots for Model <em>With</em> Transformations</h2>
-
-<img data-src="women-in-stem_files/figure-revealjs/unnamed-chunk-9-1.png" width="960" class="r-stretch"></section></section>
 <section>
 <section id="results" class="title-slide slide level1 center">
 <h1>Results</h1>
 
 </section>
+<section id="diagnostic-plots-for-model-without-transformation" class="slide level2">
+<h2>Diagnostic Plots for Model <em>Without</em> Transformation</h2>
+
+<img data-src="women-in-stem_files/figure-revealjs/unnamed-chunk-8-1.png" width="960" class="r-stretch"></section>
+<section id="diagnostic-plots-for-model-with-transformation" class="slide level2">
+<h2>Diagnostic Plots for Model <em>With</em> Transformation</h2>
+
+<img data-src="women-in-stem_files/figure-revealjs/unnamed-chunk-9-1.png" width="960" class="r-stretch"></section>
 <section id="metrics-comparison" class="slide level2">
 <h2>Metrics Comparison</h2>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code># Comparison of Model Performance Indices
 
-Name       | Model |   AIC (weights) |   BIC (weights) |    R2 | R2 (adj.) |      RMSE
---------------------------------------------------------------------------------------
-lm_reduced |    lm | -1674.1 (&gt;.999) | -1653.2 (&gt;.999) | 0.581 |     0.538 | 3.540e-06
-lm_full    |    lm |  1622.3 (&lt;.001) |  1643.3 (&lt;.001) | 0.498 |     0.447 |  9279.969</code></pre>
+Name        | Model |   AIC (weights) |   BIC (weights) |    R2 | R2 (adj.) |      RMSE
+---------------------------------------------------------------------------------------
+lm1_reduced |    lm |  1618.1 (&lt;.001) |  1632.1 (&lt;.001) | 0.486 |     0.457 |  9393.617
+lm2_reduced |    lm | -1678.7 (&gt;.999) | -1664.7 (&gt;.999) | 0.573 |     0.549 | 3.573e-06</code></pre>
 </div>
 </div>
-</section>
-<section id="model-prediction" class="slide level2">
-<h2>Model Prediction</h2>
-<div class="cell">
-
-</div>
-<p><em>statistical output</em></p>
 </section></section>
 <section id="conclusion" class="title-slide slide level1 center">
 <h1>Conclusion</h1>
 <ul>
-<li>The practical implications of using an inverse transformation dependent response variable in multiple linear regression are…..</li>
-<li>Upon reviewing the adjusted <span class="math inline">\(R^2\)</span> values of each model, it appears that…..</li>
-<li>Bullet point 3</li>
+<li>Regression models with an inverse-transformation dependent response variable are not easy to explain to individuals without a statistics background, which is likely to occur in statistical consulting.</li>
+<li>Based on the adjusted <span class="math inline">\(R^2\)</span> values of the two models, there is a less than 10% loss of ability to explain the variability between our response variable and explanatory variables by using a linear regression model <strong>without</strong> an inverse-transformation dependent response variable to one <strong>with</strong>.</li>
 </ul>
 </section>
 
 <section id="further-research" class="title-slide slide level1 center">
 <h1>Further Research</h1>
 <ul>
-<li>I would like to use the ACS Application Programming Interface (API) to export more recent data and run the multiple linear regression models using the <a href="https://github.com/tidymodels">TidyModels</a> framework.</li>
-<li>I would like to compare the base R statistical data visualizations to those from the various ggplot2 extension packages (<a href="https://github.com/kassambara/ggpubr"><code>ggpubr</code></a>, <a href="https://github.com/easystats"><code>easystats</code></a>, <a href="https://github.com/yeukyul/lindia"><code>lindia</code></a>, <a href="https://github.com/IndrajeetPatil/ggstatsplot"><code>ggstatsplot</code></a>) used in this presentation.</li>
+<li>I would like to redo my analysis with a data set of a more quantitative nature, and run the regression models using the <a href="https://github.com/tidymodels">TidyModels</a> framework.</li>
+<li>I would like to do a comparison of the data visualizations and analyses available in the various ggplot2 extension packages (<a href="https://github.com/kassambara/ggpubr"><code>ggpubr</code></a>, <a href="https://github.com/easystats"><code>easystats</code></a>, <a href="https://github.com/yeukyul/lindia"><code>lindia</code></a>, <a href="https://github.com/IndrajeetPatil/ggstatsplot"><code>ggstatsplot</code></a>) used in this presentation.</li>
 </ul>
 </section>
 
 <section id="acknowledgements" class="title-slide slide level1 center">
 <h1>Acknowledgements</h1>
 <ul>
-<li>I would like to thank my colleagues, Sara Hatter and Ken Vu, with whom I collaborated on the previous research project <a href="https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM"><em>Gender Wage Inequality in STEM</em></a>.</li>
-<li>I would like to thank the FiveThirtyEight blog for uploading the data behind their story, <a href="https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/"><em>The Economic Guide To Picking A College Major</em></a>, which was used for this analysis.</li>
-<li>I would like to thank Prof.&nbsp;Eric Suess for his assistance with this research.</li>
+<li>I would like to thank my colleagues, Sara Hatter and Ken Vu, with whom I collaborated on the previous research projects, <a href="https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM"><em>Gender Wage Inequality in STEM</em></a> and <a href="https://github.com/lgibson7/Unemployment-in-STEM"><em>Unemployment in STEM</em></a>, which laid the groundwork for this project.</li>
+<li>I would like to acknowledge the FiveThirtyEight blog for uploading the data behind their story, <a href="https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/"><em>The Economic Guide To Picking A College Major</em></a>, which was used for this analysis.</li>
+<li>I would like to thank Prof.&nbsp;Eric Suess for his guidance with this research and the <strong><em>#rstats</em></strong> community members who helped with the styling of this presentation.</li>
 </ul>
 </section>
 

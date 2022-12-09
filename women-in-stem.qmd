@@ -8,28 +8,29 @@ format:
 ---
 
 # Introduction
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 dat1 <- read.csv("women-stem.csv")
 
 library(pacman)
 
 suppressWarnings(p_load(dplyr, ggplot2, ggpubr, scales, MASS, car, lmtest, 
-                        ggrepel, faraway, ggcorrplot, GGally, lindia, see, performance, ggstatsplot, rstantools, PMCMRplus, cowplot, parameters, report, datawizard))
+                        ggrepel, faraway, ggcorrplot, GGally, lindia, see, 
+                        performance, ggstatsplot, rstantools, PMCMRplus, 
+                        cowplot, parameters, report, modelbased))
 
 options(scipen = 100) # remove scientific notation
 ```
 
-- In [previous research](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM), I used **multiple linear regression (MLR)** to explore the relationship between median salary of STEM major categories and gender demographics. 
-- The final reduced model used the inverse transformation of the response variable to improve the model fit.
-- While transforming response and/or explanatory variables can lead to a better fitting model, often it is not easily understood by the average person. 
+-   In previous research, I've used multiple linear regression **(MLR)** to explore the relationship between median salary of STEM majors and gender demographics.
+-   The final reduced model used the inverse transformation of the response variable, due to the skewness of it's distribution, to improve the model fit.
+-   While transforming response variables can lead to better fitting models, these models are not easy to explain.
 
 # Outline
 
 Problem
 
 Data Source
-
-Background
 
 Methods
 
@@ -41,37 +42,37 @@ Further Research
 
 # Problem
 
-How much prediction power is lost by ***not*** using a transformed response variable in a multiple linear regression model?
+-   How much prediction power is lost by ***not*** using a transformed response variable in a linear regression model?
+
+-   Is it worth the inability to easily explain your model?
 
 # Data Source
-- The [data](https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv) was obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series (PUMS). 
-- It has 76 observations, each representing a STEM major, and 9 variables: `Rank`, `Major_code`, `Major`, `Major_category`, `Total`, `Men`, `Women`, `ShareWomen`, `Median`. 
 
+-   The [data set](https://github.com/fivethirtyeight/data/blob/master/college-majors/women-stem.csv) was obtained from the American Community Survey (ACS) 2010-2012 Public Use Microdata Series (PUMS).
+-   It has 76 observations and 9 variables.
 
-# Background
-
-## 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+```{r echo=FALSE, include=FALSE}
+options(scipen=3)
 
 # remove Rank, Major_code, and Major
 dat2 <- dat1[,-c(1,2,3)] 
 
-# Get totals for men and women for each major category
-dat_stats <- rbind(
-  
-#   Get totals for men
-  dat2 %>% group_by(Major_category) %>%
-    summarize(Grand_Total = sum(Men), Proportion=Grand_Total/sum(Total)) %>%
-    mutate(Sex="Men", labelpos=Proportion/2),
-  
-# Get totals for women
-dat2 %>% group_by(Major_category) %>%
- summarize(Grand_Total = sum(Women), Proportion=Grand_Total/sum(Total)) %>%
- mutate(Sex="Women", labelpos=1 - (Proportion/2))) %>% 
-mutate(Sex = Sex %>% factor(levels=c("Men", "Women")))
+#datawizard::standardize(dat2)
+
+lm1 <- lm(Median ~., data=dat2[-c(2)])
+lm1_reduced<-step(lm1)
+lm1_reduced
+lm2 <- lm((Median^(-1)) ~., data=dat2[-c(2)])
+lm2_reduced<-step(lm2)
+lm2_reduced
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
+
+
 
 # bar chart
-p7 <- dat_stats %>% ggplot(aes(x=Major_category, y=Proportion, fill=Sex)) +
+p7 <- dat1 %>% ggplot(aes(x=Major_category, y=Proportion, fill=Sex)) +
   stat_summary(geom = "bar", position="fill") +
  ggtitle("Proportion of Sexes across Major Categories") +
   scale_y_continuous(labels = scales::percent_format()) + 
@@ -83,10 +84,10 @@ p7 <- dat_stats %>% ggplot(aes(x=Major_category, y=Proportion, fill=Sex)) +
 p7 <- p7 + theme(legend.position = "top")
 p7
 
-
 ```
 
-## 
+## Exploratory Data Analysis
+
 ```{r}
 # violin plot
 p8 <- ggstatsplot::ggbetweenstats(
@@ -102,7 +103,8 @@ p8 <- ggstatsplot::ggbetweenstats(
   outlier.tagging = TRUE,
   outlier.label = Major,
   package = "ggsci",
-  palette = "default_jco"
+  palette = "default_jco", 
+  pairwise.comparisons = FALSE
   
   )
 
@@ -111,101 +113,71 @@ p8
 
 # Method
 
-- In this project, I will compare multiple linear regression models **with** an inverse transformation dependent response variable to one **without** an inverse transformation dependent response variable.
 
+## Model *Without* Transformation
 
-```{r echo=FALSE}
-## need to do step-wise reduction from full additive model
-
-options(scipen=3)
-
-#datawizard::standardize(dat2)
-
-lm_full <- lm(Median~.,data=dat2)
-
-lm_reduced <- lm((Median^(-1)) ~ Major_category + Men + ShareWomen + Men*ShareWomen,
-                 data=dat2)
-
-
-```
-
-## Model *Without* Transformed Variable
 ```{r, size= "tiny"}
-parameters::model_parameters(lm_full)
+parameters::model_parameters(lm1_reduced)
 ```
 
-# Why Do a Transformation?
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Why a Transformation?
 
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 p1 <- ggpubr::gghistogram(dat2$Median) + ggtitle("Response Variable Without Transformation")
 
-p2 <-lindia::gg_boxcox(lm_full) + ggtitle("Box Cox for Model Without Transformation")
+p2 <-lindia::gg_boxcox(lm1_reduced) + ggtitle("Box Cox for Model Without Transformation")
 
-plot_grid(p1, p2)
+cowplot::plot_grid(p1, p2)
 ```
 
-## Model *With* Transformed Variable
+## Model *With* Transformation
+
 ```{r, size="tiny"}
-parameters::model_parameters(lm_reduced)
+parameters::model_parameters(lm2_reduced)
 
-```
-
-
-## Comparison of Models
-
-*Comparison*
-
-
-## Diagnostic Plots for Model *Without* Transformations
-```{r}
-#lindia::gg_diagnose(lm_full)
-performance::check_model(lm_full)
-```
-
-## Diagnostic Plots for Model *With* Transformations
-```{r}
-#lindia::gg_diagnose(lm_reduced)
-performance::check_model(lm_reduced)
 ```
 
 # Results
 
-## Metrics Comparison
+## Diagnostic Plots for Model *Without* Transformation
+
 ```{r}
-performance::compare_performance(lm_reduced, lm_full, metrics = "common")
+#lindia::gg_diagnose(lm_full)
+performance::check_model(lm1_reduced)
 ```
 
-## Model Prediction
-```{r eval=FALSE}
-# need to figure why lm_reduced won't output
+## Diagnostic Plots for Model *With* Transformation
 
-#report::report(lm_reduced)
-#report::report(lm_full)
+```{r}
+#lindia::gg_diagnose(lm_reduced)
+performance::check_model(lm2_reduced)
 ```
 
-*statistical output*
+## Metrics Comparison
+
+```{r}
+performance::compare_performance(lm1_reduced, lm2_reduced, metrics = "common")
+```
 
 # Conclusion
 
-- The practical implications of using an inverse transformation dependent response variable in multiple linear regression are.....
-- Upon reviewing the adjusted $R^2$ values of each model, it appears that..... 
-- Bullet point 3
+
+-   Regression models with an inverse-transformation dependent response variable are not easy to explain to individuals without a statistics background, which is likely to occur in statistical consulting.
+-   Based on the adjusted $R^2$ values of the two models, there is a less than 10% loss of ability to explain the variability between our response variable and explanatory variables by using a linear regression model **without** an inverse-transformation dependent response variable to one **with**.
 
 
 # Further Research
 
--   I would like to use the ACS Application Programming Interface (API) to export more recent data and run the multiple linear regression models using the [TidyModels](https://github.com/tidymodels) framework.
--   I would like to compare the base R statistical data visualizations to those from the various ggplot2 extension packages ([`ggpubr`](https://github.com/kassambara/ggpubr), [`easystats`](https://github.com/easystats), [`lindia`](https://github.com/yeukyul/lindia), [`ggstatsplot`](https://github.com/IndrajeetPatil/ggstatsplot)) used in this presentation.
-
+-   I would like to redo my analysis with a data set of a more quantitative nature, and run the regression models using the [TidyModels](https://github.com/tidymodels) framework.
+-   I would like to do a comparison of the data visualizations and analyses available in the various ggplot2 extension packages ([`ggpubr`](https://github.com/kassambara/ggpubr), [`easystats`](https://github.com/easystats), [`lindia`](https://github.com/yeukyul/lindia), [`ggstatsplot`](https://github.com/IndrajeetPatil/ggstatsplot)) used in this presentation.
 
 # Acknowledgements
 
-- I would like to thank my colleagues, Sara Hatter and Ken Vu, with whom I collaborated on the previous research project [*Gender Wage Inequality in STEM*](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM).
-- I would like to thank the FiveThirtyEight blog for uploading the data behind their story, [*The Economic Guide To Picking A College Major*](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), which was used for this analysis.
-- I would like to thank Prof. Eric Suess for his assistance with this research.
-
+-   I would like to thank my colleagues, Sara Hatter and Ken Vu, with whom I collaborated on the previous research projects, [*Gender Wage Inequality in STEM*](https://github.com/lgibson7/Gender-Wage-Inequality-in-STEM) and [*Unemployment in STEM*](https://github.com/lgibson7/Unemployment-in-STEM), which laid the groundwork for this project.
+-   I would like to acknowledge the FiveThirtyEight blog for uploading the data behind their story, [*The Economic Guide To Picking A College Major*](https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/), which was used for this analysis.
+-   I would like to thank Prof. Eric Suess for his guidance with this research and the ***#rstats*** community members who helped with the styling of this presentation.
 
 # Appendix
 
-- This presentation can be viewed at: <https://lgibson7.quarto.pub/women-in-stem>. 
-- Code for this presentation can be found at: <https://github.com/lgibson7/Women-in-STEM>.
+-   This presentation can be viewed at: <https://lgibson7.quarto.pub/women-in-stem>.
+-   Code for this presentation can be found at: <https://github.com/lgibson7/Women-in-STEM>.
